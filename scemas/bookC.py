@@ -1,13 +1,20 @@
 from typing import List, Optional
 from pydantic import BaseModel,EmailStr
 from sqlmodel import SQLModel, Field as SQLField
-from datetime import datetime
 
 class Book(SQLModel, table=True):
     book_id: int = SQLField(default=None, nullable=False, primary_key=True)
     title: str
     author: str
     year: int
+    class Config:
+        json_schema_extra = {
+        "example": {
+        "title": "История господина Н",
+        "author": "Некто Нектонович",
+        "year": 2001
+            }
+        }
 
 class User(SQLModel, table=True):
     user_id: int = SQLField(default=None, nullable=False, primary_key=True)
@@ -25,10 +32,10 @@ class User(SQLModel, table=True):
 
 class Book_Ownship(SQLModel, table=True):
     operation_id: int = SQLField(default=None, nullable=False, primary_key=True)
-    book: int = SQLField(foreign_key="Book.book_id")
-    owner: int = SQLField(foreign_key="User.user_id")
-    start_date: datetime.date
-    end_date: datetime.date
+    book: int = SQLField(foreign_key="book.book_id")
+    owner: int = SQLField(foreign_key="user.user_id")
+    start_date: str
+    end_date: str
 
 class MessageResponse(BaseModel):
     message: str

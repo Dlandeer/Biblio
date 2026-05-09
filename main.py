@@ -1,23 +1,36 @@
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status,Depends
+from contextlib import asynccontextmanager
 
 from scemas import bookC
+from sqlmodel import Session, select
+from sqlalchemy import text
+from db import get_session, init_database
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_database()
+    yield
+app = FastAPI(lifespan=lifespan)
 
 
 books: List[bookC.Book] = []
 next_id = 1
 
+@app.get("/test-db", status_code=status.HTTP_200_OK)
+def test_database(session: Session = Depends(get_session)):
+    result = session.exec(select(text("'Hello world'"))).all()
+    return result
+
 @app.post("/books",status_code=status.HTTP_201_CREATED)
-def add_book(book: bookC.Book):
+def add_book(book: bookC.Book, session:Session=Depends(get_session)):
     global next_id
     global books
-    book.id=next_id
-    next_id+=1
-    books.append(book)
-    return bookC.BookResponse(message = "Книга успешно добавлена", book = books[-1])
+    session.add(book)
+    session.commit()
+    session.refresh(book)
+    return book
 
 @app.get("/books",status_code=status.HTTP_200_OK, response_model=bookC.BooksResponse)
 def all_books():
