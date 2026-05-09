@@ -32,10 +32,15 @@ def add_book(book: bookC.Book, session:Session=Depends(get_session)):
     session.refresh(book)
     return book
 
-@app.get("/books",status_code=status.HTTP_200_OK, response_model=bookC.BooksResponse)
-def all_books():
-    global books
-    return bookC.BooksResponse(books=books)
+@app.get("/books",status_code=status.HTTP_200_OK)
+def all_books(session: Session = Depends(get_session)):
+    books = session.exec(select(bookC.Book)).all()
+    if books is None or len(books) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_204_NO_CONTENT,
+            detail=f"К сожалению книг пока нет"
+            )
+    return books
 
 @app.get("/books/{book_id}",status_code=status.HTTP_200_OK, response_model=bookC.Book)
 def get_book(book_id:int):
