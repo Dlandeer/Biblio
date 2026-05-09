@@ -33,7 +33,7 @@ def get_book(book_id:int):
     raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f"Книга с id {book_id} не найдена")
 
 @app.put("/books/{book_id}",status_code=status.HTTP_200_OK, response_model= bookC.BookResponse)
-def upd_book(book_id:int, book:Book):
+def upd_book(book_id:int, book:bookC.Book):
     global books
     for book1 in books:
         if book1.id == book_id:
