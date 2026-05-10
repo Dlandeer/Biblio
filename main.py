@@ -52,16 +52,21 @@ def get_book(book_id:int,session: Session = Depends(get_session)):
             )
     return book[0]
 
-@app.put("/books/{book_id}",status_code=status.HTTP_200_OK, response_model= bookC.BookResponse)
-def upd_book(book_id:int, book:bookC.Book):
-    global books
-    for book1 in books:
-        if book1.id == book_id:
-            book.id=book_id
-            books.remove(book1)
-            books.append(book)
-            return bookC.BookResponse(message = "Книга успешно обновлена", book=books[-1])
-    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f"Книга с id {book_id} не найдена")
+@app.put("/books/{book_id}",status_code=status.HTTP_200_OK)
+def upd_book(book_id:int, book:bookC.Book, session: Session = Depends(get_session)):
+    up_book = session.exec(select(bookC.Book).where(bookC.Book.book_id == book_id)).first()
+    if book is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"К сожалению, данной книги нет в нашей библиотеке"
+            )
+    up_book.author=book.author
+    up_book.year=book.year
+    up_book.title=book.title
+    session.add(up_book)
+    session.commit()
+    session.refresh(up_book)
+    return up_book
 
 @app.delete("/books/{book_id}",status_code=status.HTTP_200_OK, response_model= bookC.MessageResponse)
 def del_book(book_id:int):
