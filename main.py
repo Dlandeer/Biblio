@@ -55,7 +55,7 @@ def get_book(book_id:int,session: Session = Depends(get_session)):
 @app.put("/books/{book_id}",status_code=status.HTTP_200_OK)
 def upd_book(book_id:int, book:bookC.Book, session: Session = Depends(get_session)):
     up_book = session.exec(select(bookC.Book).where(bookC.Book.book_id == book_id)).first()
-    if book is None:
+    if up_book is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"К сожалению, данной книги нет в нашей библиотеке"
@@ -69,11 +69,13 @@ def upd_book(book_id:int, book:bookC.Book, session: Session = Depends(get_sessio
     return up_book
 
 @app.delete("/books/{book_id}",status_code=status.HTTP_200_OK, response_model= bookC.MessageResponse)
-def del_book(book_id:int):
-    global books
-    global next_id
-    for book in books:
-        if book.id == book_id:
-            books.remove(book)
-            return bookC.MessageResponse(message="Книга удалена")
-    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f"Книга с id {book_id} не найдена")
+def del_book(book_id:int, session: Session = Depends(get_session)):
+    del_book = session.exec(select(bookC.Book).where(bookC.Book.book_id == book_id)).first()
+    if del_book is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"К сожалению, данной книги нет в нашей библиотеке или она уже удалена из нее"
+            )
+    session.delete(del_book)
+    session.commit()
+    return {"message":"Книга успешно удалена"}
