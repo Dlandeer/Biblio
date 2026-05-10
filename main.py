@@ -42,13 +42,15 @@ def all_books(session: Session = Depends(get_session)):
             )
     return books
 
-@app.get("/books/{book_id}",status_code=status.HTTP_200_OK, response_model=bookC.Book)
-def get_book(book_id:int):
-    global books
-    for book in books:
-        if book.id == book_id:
-            return book
-    raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f"Книга с id {book_id} не найдена")
+@app.get("/books/{book_id}",status_code=status.HTTP_200_OK)
+def get_book(book_id:int,session: Session = Depends(get_session)):
+    book = session.exec(select(bookC.Book).where(bookC.Book.book_id == book_id)).all()
+    if book is None or len(book) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"К сожалению, данной книги нет в нашей библиотеке"
+            )
+    return book[0]
 
 @app.put("/books/{book_id}",status_code=status.HTTP_200_OK, response_model= bookC.BookResponse)
 def upd_book(book_id:int, book:bookC.Book):
