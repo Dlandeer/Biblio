@@ -1,8 +1,8 @@
 from typing import Annotated
 from fastapi import APIRouter, status, Depends, HTTPException
-from db import get_session
-from auth import get_current_user
-from scemas.bookC import User,Book,Book_Ownship
+from app.db import get_session
+from app.auth import get_current_user
+from app.scemas.bookC import User,Book,Book_Ownship
 from sqlmodel import Session, select
 from datetime import timedelta,datetime
 
@@ -55,6 +55,11 @@ def return_book(book_name:str, user: Annotated[User, Depends(get_current_user)],
 @router.get("/ownship_history")
 def get_ownship_history(session: Session=Depends(get_session)):
     users = session.exec(select(User)).all()
+    if users is None or len(users)==0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"К сожалению, книги пока не брали"
+            )
     output = dict()
     for user in users:
         output1=dict()
@@ -68,13 +73,6 @@ def get_ownship_history(session: Session=Depends(get_session)):
                 output1.update({book.start_date + " - " + book.end_date : book_instance.title + ", id - " + str(book.book)})
             output.update({user.email : output1})
     return {"message":output}
-
-@router.delete("/ownship_history")
-def purge_db(session: Session=Depends(get_session)):
-    ownship=session.exec(select(Book_Ownship)).first()
-    session.delete(ownship)
-    session.commit()
-    return {"message":"БД успешно отчищена"}
 
 @router.get("/ownship_history/book/{book_id}")
 def get_book_ownship_history( book_id: int,session: Session=Depends(get_session)):

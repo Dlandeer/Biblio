@@ -1,10 +1,10 @@
-from config import settings
+from app.config import settings
 from jose import JWTError, jwt
 from fastapi import HTTPException,status,Depends
 from datetime import timedelta,timezone,datetime
-from scemas.bookC import User
+from app.scemas.bookC import User
 from sqlmodel import Session,select
-from db import get_session
+from app.db import get_session
 from fastapi.security import OAuth2PasswordBearer
 
 

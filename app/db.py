@@ -1,5 +1,6 @@
 from sqlmodel import create_engine, Session,SQLModel
-DB_URL = "postgresql://fastapi_taskman:fastapi_taskman@127.0.0.1:5432/fastapi_taskman"
+from app.config import settings
+DB_URL = f"postgresql://{settings.db_username}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}"
 engine = create_engine(DB_URL, echo=True)
 
 def get_session():

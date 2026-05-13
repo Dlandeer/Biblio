@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from db import init_database
-import auth,connections,book_handling
+from app.db import init_database
+import app.auth as auth,app.connections as connections,app.book_handling as book_handling
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

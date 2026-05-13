@@ -2,9 +2,9 @@ from typing import Annotated
 from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session,select
-from db import get_session
-from scemas.bookC import User
-from auth_handler import create_access_token,get_current_user
+from app.db import get_session
+from app.scemas.bookC import User
+from app.auth_handler import create_access_token,get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Безопасность"])
 

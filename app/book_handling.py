@@ -1,6 +1,6 @@
-from scemas import bookC
+from app.scemas import bookC
 from sqlmodel import Session, select
-from db import get_session
+from app.db import get_session
 from fastapi import Depends,APIRouter, HTTPException,status
 
 router=APIRouter(prefix="/books", tags=["База данных книг"])
