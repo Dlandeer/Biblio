@@ -68,7 +68,7 @@ def get_book_ownship_history( book_id: int,session: Session=Depends(get_session)
     else:
         for owner in history:
             user = session.exec(select(User).where(User.user_id==owner.owner)).first()
-            output.update({owner.start_date + " - " + owner.end_date : user.name})
+            output.update({owner.start_date + " - " + owner.end_date : user.name + ", email - " + user.email})
     return {"message":output}
 
 @router.get("/ownship_history/user/{user_id}")
@@ -83,5 +83,5 @@ def get_user_history(user_id: int,session: Session=Depends(get_session)):
     else:
         for instance in user:
             book = session.exec(select(Book).where(Book.book_id==instance.book)).first()
-            output.update({instance.start_date + " - " + instance.end_date : book.title})
+            output.update({instance.start_date + " - " + instance.end_date : book.title + ", id - " + str(book.book_id)})
         return {"message" : output}
