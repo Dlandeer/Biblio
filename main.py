@@ -7,7 +7,7 @@ from scemas import bookC
 from sqlmodel import Session, select
 from sqlalchemy import text
 from db import get_session, init_database
-import auth
+import auth,connections
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,6 +16,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(auth.router)
+app.include_router(connections.router)
 
 @app.get("/test-db", status_code=status.HTTP_200_OK)
 def test_database(session: Session = Depends(get_session)):
