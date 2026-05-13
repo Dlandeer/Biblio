@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel,EmailStr
-from sqlmodel import SQLModel, Field as SQLField
+from sqlmodel import SQLModel, Field as SQLField,UniqueConstraint
 
 class Book(SQLModel, table=True):
     book_id: int = SQLField(default=None, nullable=False, primary_key=True)
@@ -16,7 +16,8 @@ class Book(SQLModel, table=True):
             }
         }
 
-class User(SQLModel, table=True):
+class User(SQLModel, BaseModel, table=True):
+    __table_args__ = (UniqueConstraint("email"),)
     user_id: int = SQLField(default=None, nullable=False, primary_key=True)
     email: EmailStr = SQLField(nullable=True, unique_items=True)
     password: str | None

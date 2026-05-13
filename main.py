@@ -7,6 +7,7 @@ from scemas import bookC
 from sqlmodel import Session, select
 from sqlalchemy import text
 from db import get_session, init_database
+import auth
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,19 +15,15 @@ async def lifespan(app: FastAPI):
     yield
 app = FastAPI(lifespan=lifespan)
 
-
-books: List[bookC.Book] = []
-next_id = 1
+app.include_router(auth.router)
 
 @app.get("/test-db", status_code=status.HTTP_200_OK)
 def test_database(session: Session = Depends(get_session)):
-    result = session.exec(select(text("'Hello world'"))).all()
+    result = session.exec(select(bookC.User)).all()
     return result
 
 @app.post("/books",status_code=status.HTTP_201_CREATED)
 def add_book(book: bookC.Book, session:Session=Depends(get_session)):
-    global next_id
-    global books
     session.add(book)
     session.commit()
     session.refresh(book)
