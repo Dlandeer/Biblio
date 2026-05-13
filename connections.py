@@ -56,7 +56,7 @@ def purge_db(session: Session=Depends(get_session)):
     session.commit()
     return {"message":"БД успешно отчищена"}
 
-@router.get("/ownship_history/{book_id}")
+@router.get("/ownship_history/book/{book_id}")
 def get_book_ownship_history( book_id: int,session: Session=Depends(get_session)):
     history = session.exec(select(Book_Ownship).where(Book_Ownship.book == book_id)).all()
     output = dict()
@@ -70,3 +70,18 @@ def get_book_ownship_history( book_id: int,session: Session=Depends(get_session)
             user = session.exec(select(User).where(User.user_id==owner.owner)).first()
             output.update({owner.start_date + " - " + owner.end_date : user.name})
     return {"message":output}
+
+@router.get("/ownship_history/user/{user_id}")
+def get_user_history(user_id: int,session: Session=Depends(get_session)):
+    user = session.exec(select(Book_Ownship).join(User).where(User.user_id==user_id)).all()
+    output = dict()
+    if user is None or len(user)==0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"К сожалению, пользователь с id {user_id} пока не брал книги или не существует"
+            )
+    else:
+        for instance in user:
+            book = session.exec(select(Book).where(Book.book_id==instance.book)).first()
+            output.update({instance.start_date + " - " + instance.end_date : book.title})
+        return {"message" : output}
