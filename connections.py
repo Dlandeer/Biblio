@@ -46,7 +46,7 @@ def get_book(book_name:str, user: Annotated[User, Depends(get_current_user)], se
 
 @router.get("/ownship_history")
 def get_ownship_history(session: Session=Depends(get_session)):
-    ownship=session.exec(select(Book_Ownship)).all()
+    ownship=session.exec(select(Book_Ownship,User).join(User)).all()
     return ownship
 
 @router.delete("/ownship_history")
@@ -55,3 +55,18 @@ def purge_db(session: Session=Depends(get_session)):
     session.delete(ownship)
     session.commit()
     return {"message":"БД успешно отчищена"}
+
+@router.get("/ownship_history/{book_id}")
+def get_book_ownship_history( book_id: int,session: Session=Depends(get_session)):
+    history = session.exec(select(Book_Ownship).where(Book_Ownship.book == book_id)).all()
+    output = dict()
+    if history is None or len(history)==0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"К сожалению, данной книги нет в нашей библиотеке или ее еще не брали"
+            )
+    else:
+        for owner in history:
+            user = session.exec(select(User).where(User.user_id==owner.owner)).first()
+            output.update({owner.start_date + " - " + owner.end_date : user.name})
+    return {"message":output}
