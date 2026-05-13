@@ -54,8 +54,20 @@ def return_book(book_name:str, user: Annotated[User, Depends(get_current_user)],
 
 @router.get("/ownship_history")
 def get_ownship_history(session: Session=Depends(get_session)):
-    ownship=session.exec(select(Book_Ownship,User).join(User)).all()
-    return ownship
+    users = session.exec(select(User)).all()
+    output = dict()
+    for user in users:
+        output1=dict()
+        books=session.exec(select(Book_Ownship).where(Book_Ownship.owner==user.user_id)).all()
+        if books is None or len(books)==0:
+            output.update({user.email : "Не брал книг"})
+            continue
+        else:
+            for book in books:
+                book_instance=session.exec(select(Book).where(Book.book_id==book.book)).first()
+                output1.update({book.start_date + " - " + book.end_date : book_instance.title + ", id - " + str(book.book)})
+            output.update({user.email : output1})
+    return {"message":output}
 
 @router.delete("/ownship_history")
 def purge_db(session: Session=Depends(get_session)):
