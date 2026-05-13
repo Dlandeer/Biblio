@@ -1,7 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, status, Depends, HTTPException
 from db import get_session
-from fastapi.security import OAuth2PasswordBearer
 from auth import get_current_user
 from scemas.bookC import User,Book,Book_Ownship
 from sqlmodel import Session, select
@@ -24,13 +23,7 @@ def get_book(book_name:str, user: Annotated[User, Depends(get_current_user)], se
             session.refresh(new_ownship)
             return new_ownship
         else:
-            if datetime.strptime(ownship.end_date, '%Y-%m-%d') < datetime.today():
-                new_ownship=Book_Ownship(owner=user.user_id,book=books[i].book_id,start_date=str(datetime.now().date()),end_date=str(datetime.now().date()+timedelta(days=14)))
-                session.add(new_ownship)
-                session.commit()
-                session.refresh(new_ownship)
-                return new_ownship
-            elif datetime.strptime(ownship.end_date, '%Y-%m-%d') == datetime.today() and user.user_id == ownship.owner:
+            if datetime.strptime(ownship.end_date, '%Y-%m-%d') <= datetime.today():
                 new_ownship=Book_Ownship(owner=user.user_id,book=books[i].book_id,start_date=str(datetime.now().date()),end_date=str(datetime.now().date()+timedelta(days=14)))
                 session.add(new_ownship)
                 session.commit()
@@ -43,6 +36,21 @@ def get_book(book_name:str, user: Annotated[User, Depends(get_current_user)], se
                 else:
                     continue
             
+@router.put("/return")
+def return_book(book_name:str, user: Annotated[User, Depends(get_current_user)], session: Session=Depends(get_session)):
+    book=session.exec(select(Book_Ownship).join(Book).where(Book.title==book_name)).first()
+    if book is None or book.owner != user.user_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"К сожалению, данная книга взята не вами")
+    else:
+        if book.end_date == str(datetime.now().date()):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Книга уже возвращена")
+        book.end_date = str(datetime.now().date())
+        session.add(book)
+        session.commit()
+        session.refresh(book)
+        return book
 
 @router.get("/ownship_history")
 def get_ownship_history(session: Session=Depends(get_session)):
