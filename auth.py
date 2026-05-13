@@ -1,11 +1,17 @@
+from typing import Annotated
 from fastapi import APIRouter, status, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session,select
+from datetime import timedelta,timezone,datetime
 from db import get_session
 from scemas.bookC import User
-from random import randint
+from auth_handler import create_access_token,get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Безопасность"])
+
+@router.get("/me", response_model=int)
+def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+    return current_user.user_id
 
 @router.post("/sign_up", status_code=status.HTTP_201_CREATED)
 def create_user(user:User, session:Session=Depends(get_session)):
@@ -32,8 +38,7 @@ def login(login_attempt_data: OAuth2PasswordRequestForm = Depends(), db_session:
         detail=f"Пользователь {login_attempt_data.username} не найден"
         )
     if existing_user.password == login_attempt_data.password:
-        print(1)
-        access_token = str(existing_user.user_id*112 - randint(10,30))
+        access_token = create_access_token(data={"sub": login_attempt_data.username})
         print(access_token)
         return {
                 "access_token": access_token,
