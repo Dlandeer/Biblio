@@ -4,9 +4,9 @@ from db import get_session
 from auth import get_current_user
 from scemas.bookC import User,Book,Book_Ownship
 from sqlmodel import Session, select
-from datetime import timedelta,timezone,datetime
+from datetime import timedelta,datetime
 
-router=APIRouter(prefix="/book_ownship")
+router=APIRouter(prefix="/book_ownship", tags=["Выдача книг"])
 
 @router.post("/add")
 def get_book(book_name:str, user: Annotated[User, Depends(get_current_user)], session: Session=Depends(get_session)):

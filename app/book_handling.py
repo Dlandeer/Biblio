@@ -1,36 +1,18 @@
-from typing import List, Optional
-
-from fastapi import FastAPI, HTTPException, status,Depends
-from contextlib import asynccontextmanager
-
 from scemas import bookC
 from sqlmodel import Session, select
-from sqlalchemy import text
-from db import get_session, init_database
-import auth,connections
+from db import get_session
+from fastapi import Depends,APIRouter, HTTPException,status
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    init_database()
-    yield
-app = FastAPI(lifespan=lifespan)
+router=APIRouter(prefix="/books", tags=["База данных книг"])
 
-app.include_router(auth.router)
-app.include_router(connections.router)
-
-@app.get("/test-db", status_code=status.HTTP_200_OK)
-def test_database(session: Session = Depends(get_session)):
-    result = session.exec(select(bookC.User)).all()
-    return result
-
-@app.post("/books",status_code=status.HTTP_201_CREATED)
+@router.post("/",status_code=status.HTTP_201_CREATED)
 def add_book(book: bookC.Book, session:Session=Depends(get_session)):
     session.add(book)
     session.commit()
     session.refresh(book)
     return book
 
-@app.get("/books",status_code=status.HTTP_200_OK)
+@router.get("/",status_code=status.HTTP_200_OK)
 def all_books(session: Session = Depends(get_session)):
     books = session.exec(select(bookC.Book)).all()
     if books is None or len(books) == 0:
@@ -40,7 +22,7 @@ def all_books(session: Session = Depends(get_session)):
             )
     return books
 
-@app.get("/books/{book_id}",status_code=status.HTTP_200_OK)
+@router.get("/{book_id}",status_code=status.HTTP_200_OK)
 def get_book(book_id:int,session: Session = Depends(get_session)):
     book = session.exec(select(bookC.Book).where(bookC.Book.book_id == book_id)).all()
     if book is None or len(book) == 0:
@@ -50,7 +32,7 @@ def get_book(book_id:int,session: Session = Depends(get_session)):
             )
     return book[0]
 
-@app.put("/books/{book_id}",status_code=status.HTTP_200_OK)
+@router.put("/{book_id}",status_code=status.HTTP_200_OK)
 def upd_book(book_id:int, book:bookC.Book, session: Session = Depends(get_session)):
     up_book = session.exec(select(bookC.Book).where(bookC.Book.book_id == book_id)).first()
     if up_book is None:
@@ -66,7 +48,7 @@ def upd_book(book_id:int, book:bookC.Book, session: Session = Depends(get_sessio
     session.refresh(up_book)
     return up_book
 
-@app.delete("/books/{book_id}",status_code=status.HTTP_200_OK, response_model= bookC.MessageResponse)
+@router.delete("/{book_id}",status_code=status.HTTP_200_OK, response_model= bookC.MessageResponse)
 def del_book(book_id:int, session: Session = Depends(get_session)):
     del_book = session.exec(select(bookC.Book).where(bookC.Book.book_id == book_id)).first()
     if del_book is None:
@@ -77,3 +59,4 @@ def del_book(book_id:int, session: Session = Depends(get_session)):
     session.delete(del_book)
     session.commit()
     return {"message":"Книга успешно удалена"}
+
