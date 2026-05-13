@@ -1,11 +1,17 @@
+"""
+Обращение к базе данных, функции для ее инициализации
+"""
+
 from sqlmodel import create_engine, Session,SQLModel
-from app.config import settings
-DB_URL = f"postgresql://{settings.db_username}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}"
+from app.config import settings as st
+DB_URL = f"postgresql://{st.db_username}:{st.db_password}@{st.db_host}:{st.db_port}/{st.db_name}"
 engine = create_engine(DB_URL, echo=True)
 
 def get_session():
+    """Получает сессию"""
     with Session(engine) as session:
         yield session
 
 def init_database():
+    """Инициализирует базу данных"""
     SQLModel.metadata.create_all(engine)

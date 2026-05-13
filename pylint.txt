@@ -1,0 +1,9 @@
+************* Module main
+app/main.py:11:19: W0613: Unused argument 'fastapp' (unused-argument)
+************* Module scemas.models
+app/scemas/models.py:14:4: R0903: Too few public methods (0/2) (too-few-public-methods)
+app/scemas/models.py:31:4: R0903: Too few public methods (0/2) (too-few-public-methods)
+
+------------------------------------------------------------------
+Your code has been rated at 9.87/10 (previous run: 6.85/10, +3.02)
+

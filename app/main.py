@@ -1,12 +1,18 @@
-from fastapi import FastAPI
+"""
+Основной файл приложения, соединяет все функции, отвечает за инициализацию базы данных
+"""
+
 from contextlib import asynccontextmanager
+from fastapi import FastAPI
 from app.db import init_database
-import app.auth as auth,app.connections as connections,app.book_handling as book_handling
+from app import auth,connections,book_handling
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(fastapp: FastAPI):
+    """Инициализирует базу данных"""
     init_database()
     yield
+
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(auth.router)
