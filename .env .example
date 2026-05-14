@@ -1,0 +1,8 @@
+secret_key=5333c1f52a686920a19c4abf184c903332507652ada95292e02fc269ac648515
+algo=HS256
+access_token_expire_minutes=3600
+db_username=fastapi_taskman
+db_password=fastapi_taskman
+db_host=db
+db_port=5432
+db_name=fastapi_taskman

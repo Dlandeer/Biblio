@@ -13,6 +13,8 @@ ENV/
 # Environment & Secrets
 .env
 !.env.example
+postgres.env
+!postgres.env.example
 
 # Testing & Linting
 .pytest_cache/
