@@ -40,9 +40,11 @@
    git clone https://github.com/Dlandeer/Biblio.git
    cd Biblio
    ```
-2. Переименуйте `.env.example` в `.env` и укажите ваши настройки:
+2. Переименуйте `.env.example` в `.env`, а `portgres.env.example` в `portgres.env` и укажите ваши настройки:
    ```bash
    cp .env.example .env
+   bash
+   cp portgres.env.example portgres.env
    ```
 3. Запустите контейнеры:
    ```bash
