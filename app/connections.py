@@ -32,7 +32,7 @@ def get_book(book_name:str, user: Annotated[User, Depends(get_current_user)],
             session.commit()
             session.refresh(new_ownship)
             return new_ownship
-        if datetime.strptime(ownship.end_date, '%Y-%m-%d') <= datetime.today():
+        if datetime.strptime(ownship.end_date, '%Y-%m-%d').date() <= datetime.now().date():
             new_ownship=BookOwnship(owner=user.user_id,book=book.book_id,
                                          start_date=str(datetime.now().date()),
                                          end_date=str(datetime.now().date()+timedelta(days=14)))
