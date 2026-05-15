@@ -46,7 +46,7 @@
    bash
    cp portgres.env.example portgres.env
    ```
-3. Запустите контейнеры:
+3. Запустите контейнеры, если не сработало с первого раза, попробуйте второй раз в той же папке:
    ```bash
    docker-compose up --build
    ```
